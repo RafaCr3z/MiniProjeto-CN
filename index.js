@@ -93,15 +93,15 @@ app.post('/api/autarquias', async (req, res) => {
     }
 });
 
-// NOVA ROTA: Registar uma Ocorrência
+// NOVA ROTA: Registar uma Ocorrência (Agora associada a um município!)
 app.post('/api/ocorrencias', async (req, res) => {
     try {
-        // Recebe os dados enviados pela App do cidadão
-        const { cidadaoId, descricao, latitude, longitude, fotografiaUrl } = req.body;
+        // Recebe os dados enviados pela App (agora incluímos o 'municipio')
+        const { cidadaoId, descricao, latitude, longitude, fotografiaUrl, municipio } = req.body;
 
-        // Validação básica para garantir que não faltam dados cruciais
-        if (!cidadaoId || !descricao || !latitude || !longitude) {
-            return res.status(400).json({ erro: "Faltam dados obrigatórios para registar a ocorrência." });
+        // Validação básica atualizada
+        if (!cidadaoId || !descricao || !latitude || !longitude || !municipio) {
+            return res.status(400).json({ erro: "Faltam dados obrigatórios (incluindo o município) para registar a ocorrência." });
         }
 
         const container = await getOcorrenciasContainer();
@@ -109,23 +109,23 @@ app.post('/api/ocorrencias', async (req, res) => {
         // Estrutura do documento JSON da ocorrência
         const novaOcorrencia = {
             id: `report_${Date.now()}`,
-            cidadaoId: cidadaoId, // A Partition Key que definimos no Azure!
+            cidadaoId: cidadaoId, 
             descricao: descricao,
-            categoria: "Por classificar", // O Tiago depois vai atualizar isto com a IA
-            estado: "Pendente", // Todas as ocorrências começam como pendentes
+            municipio: municipio, // Guardamos o município na base de dados!
+            categoria: "Por classificar", 
+            estado: "Pendente", 
             localizacao: {
                 latitude: parseFloat(latitude),
                 longitude: parseFloat(longitude)
             },
-            fotografiaUrl: fotografiaUrl || "", // O link do Blob Storage que o Tiago vai fazer
+            fotografiaUrl: fotografiaUrl || "", 
             dataReporte: new Date().toISOString()
         };
 
-        // Guarda na base de dados (Cosmos DB)
         const { resource } = await container.items.create(novaOcorrencia);
         
         res.status(201).json({ 
-            mensagem: "Ocorrência registada com sucesso!", 
+            mensagem: `Ocorrência registada com sucesso no município de ${municipio}!`, 
             dados: {
                 id: resource.id,
                 estado: resource.estado,
@@ -139,15 +139,27 @@ app.post('/api/ocorrencias', async (req, res) => {
     }
 });
 
-// NOVA ROTA: Listar todas as Ocorrências (Para o Dashboard da Câmara)
+// NOVA ROTA: Listar Ocorrências (Filtradas por Município para o Dashboard da Câmara)
 app.get('/api/ocorrencias', async (req, res) => {
     try {
+        // O Diogo vai enviar o município no link. Ex: /api/ocorrencias?municipio=Castelo Branco
+        const municipioDaAutarquia = req.query.municipio; 
+        
         const container = await getOcorrenciasContainer();
+        let querySpec;
 
-        // Query para buscar todas as ocorrências, ordenadas por data (mais recentes primeiro)
-        const querySpec = {
-            query: "SELECT * FROM c ORDER BY c.dataReporte DESC"
-        };
+        if (municipioDaAutarquia) {
+            // Se o link trouxer o município, filtramos a pesquisa na base de dados
+            querySpec = {
+                query: "SELECT * FROM c WHERE c.municipio = @municipio ORDER BY c.dataReporte DESC",
+                parameters: [{ name: "@municipio", value: municipioDaAutarquia }]
+            };
+        } else {
+            // Se não trouxer, devolve todas (útil para ti como administrador testares)
+            querySpec = {
+                query: "SELECT * FROM c ORDER BY c.dataReporte DESC"
+            };
+        }
 
         const { resources: ocorrencias } = await container.items.query(querySpec).fetchAll();
 
