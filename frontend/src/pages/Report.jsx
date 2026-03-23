@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera, MapPin, CheckCircle, Loader2 } from 'lucide-react';
+import { Camera, MapPin, CheckCircle } from 'lucide-react';
 import './Report.css';
 
 const Report = ({ user }) => {
@@ -9,11 +9,28 @@ const Report = ({ user }) => {
   
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [municipio, setMunicipio] = useState('');
+  const [listaAutarquias, setListaAutarquias] = useState([]);
 
   useEffect(() => {
     setTimeout(() => {
-      setLocation('Lat: 38.722, Lng: -9.139 (Lisboa)');
+      setLocation('Lat: 38.722, Lng: -9.139 (Coordenadas Atuais)');
     }, 1500);
+
+    // Carregar a lista dinâmica de Câmaras da base de dados
+    const fetchAutarquias = async () => {
+      try {
+        const res = await fetch('/api/autarquias');
+        if (res.ok) {
+          const data = await res.json();
+          // Remove duplicados pelo nome do município, opcionalmente
+          setListaAutarquias(data.dados);
+        }
+      } catch(e) {
+        console.error("Erro a carregar autarquias", e);
+      }
+    };
+    fetchAutarquias();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -27,6 +44,7 @@ const Report = ({ user }) => {
         body: JSON.stringify({
           cidadaoId: user.id, // Vindo do App.jsx state
           descricao: `[${category}] ${description}`,
+          municipio: municipio,
           latitude: "38.722",
           longitude: "-9.139",
           fotografiaUrl: ""
@@ -50,7 +68,7 @@ const Report = ({ user }) => {
         <div className="success-card glass-panel">
           <CheckCircle size={64} className="success-icon" />
           <h2>Ocorrência Registada!</h2>
-          <p>A Câmara Municipal foi notificada. Acompanhe o estado do seu reporte no Perfil.</p>
+          <p>A Câmara Municipal de {municipio} foi notificada. Acompanhe o estado do seu reporte no Perfil.</p>
           <div className="points-reward">
             Quando resolvido, irá ganhar<br/>
             <span className="points-value text-gradient">+50 Pontos</span>
@@ -85,7 +103,23 @@ const Report = ({ user }) => {
         </div>
 
         <div className="form-group">
-          <label>Localização (GPS)</label>
+          <label>Município Alvo</label>
+          <select className="form-control" required value={municipio} onChange={e => setMunicipio(e.target.value)}>
+            <option value="" disabled>Onde ocorreu o problema?</option>
+            {listaAutarquias.length === 0 ? (
+               <option value="" disabled>A carregar base de dados...</option>
+            ) : (
+               listaAutarquias.map(aut => (
+                  <option key={aut.id} value={aut.municipio}>
+                    {aut.municipio} ({aut.nome})
+                  </option>
+               ))
+            )}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Localização Acoplada (GPS)</label>
           <div className="location-display">
             <MapPin size={20} color="var(--accent-primary)" />
             <span>{location}</span>
@@ -115,7 +149,7 @@ const Report = ({ user }) => {
           ></textarea>
         </div>
 
-        <button type="submit" className="primary-btn submit-btn" disabled={loading}>
+        <button type="submit" className="primary-btn submit-btn" disabled={loading || listaAutarquias.length === 0}>
           {loading ? 'A Enviar Azure...' : 'Enviar Reporte'}
         </button>
       </form>

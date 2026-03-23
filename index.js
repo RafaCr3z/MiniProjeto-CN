@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { getCidadaosContainer, getOcorrenciasContainer } = require('./db');
 
 const app = express();
@@ -94,6 +95,21 @@ app.get('/api/ocorrencias/cidadao/:id', async (req, res) => {
         
         res.status(200).json({ dados: resources });
     } catch (error) {
+        res.status(500).json({ erro: "Falha na base de dados." });
+    }
+});
+
+// NOVA ROTA: Obter Todas as Autarquias Registadas (Para Dropdown do Reporte)
+app.get('/api/autarquias', async (req, res) => {
+    try {
+        const container = await getCidadaosContainer();
+        const querySpec = {
+            query: "SELECT c.id, c.nome, c.municipio FROM c WHERE c.tipoUtilizador = 'Autarquia'"
+        };
+        const { resources } = await container.items.query(querySpec).fetchAll();
+        res.status(200).json({ dados: resources });
+    } catch (error) {
+        console.error("Erro ao listar autarquias:", error);
         res.status(500).json({ erro: "Falha na base de dados." });
     }
 });
@@ -270,6 +286,12 @@ app.put('/api/ocorrencias/:id/resolver', async (req, res) => {
 
 
 
+
+// SERVIR O FRONTEND EM PRODUÇÃO
+app.use(express.static(path.join(__dirname, 'frontend/dist')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+});
 
 app.listen(PORT, () => {
     console.log(`Servidor CityGuards a correr na porta ${PORT}`);

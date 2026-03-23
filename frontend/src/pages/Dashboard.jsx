@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock, MapPin } from 'lucide-react';
 import './Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = ({ user }) => {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchIssues = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/ocorrencias');
+      const url = user?.municipio ? `/api/ocorrencias?municipio=${user.municipio}` : '/api/ocorrencias';
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Erro de resposta da API CosmosDB");
       
       const data = await res.json();
@@ -22,7 +24,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchIssues();
-  }, []);
+  }, [user?.municipio]);
   
   const handleResolve = async (id) => {
     try {
@@ -53,7 +55,7 @@ const Dashboard = () => {
     <div className="dashboard-container animate-fade-in">
       <div className="dashboard-header">
         <h1>Painel Autarquia <span className="text-gradient">CityGuards</span></h1>
-        <p className="text-secondary">Gestão e triagem de ocorrências cívicas (B2B SaaS).</p>
+        <p className="text-secondary">Gestão de {user?.municipio || 'Múltiplos Municípios'} (Visão Restrita).</p>
       </div>
 
       <div className="stats-grid">
@@ -75,7 +77,7 @@ const Dashboard = () => {
 
       <div className="dashboard-content glass-panel">
         <div className="content-header">
-          <h2>Ocorrências Reportadas no CosmosDB</h2>
+          <h2>Ocorrências Reportadas para {user?.municipio}</h2>
           <button className="secondary-btn" onClick={fetchIssues}>Atualizar</button>
         </div>
         
@@ -93,7 +95,7 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {loading ? <tr><td colSpan="6" style={{textAlign:'center'}}>A carregar dados do Azure...</td></tr> : 
-               issues.length === 0 ? <tr><td colSpan="6" style={{textAlign:'center'}}>Sem base de dados vazia.</td></tr> :
+               issues.length === 0 ? <tr><td colSpan="6" style={{textAlign:'center'}}>Sem base de dados vazia. Nenhuma ocorrência neste município.</td></tr> :
                issues.map(issue => (
                 <tr key={issue.id}>
                   <td><small>{issue.id.substring(0, 15)}...</small></td>

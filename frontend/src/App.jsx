@@ -29,7 +29,7 @@ function App() {
             ) : user.role === 'council' ? (
               /* Perfil Autarquia */
               <>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard user={user} />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </>
             ) : (
