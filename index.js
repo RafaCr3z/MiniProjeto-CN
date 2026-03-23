@@ -55,31 +55,69 @@ app.post('/api/cidadaos', async (req, res) => {
     }
 });
 
+// NOVA ROTA: Obter Cidadão por Email (Para Login)
+app.get('/api/cidadaos/email/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const container = await getCidadaosContainer();
+        
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.email = @email",
+            parameters: [{ name: "@email", value: email }]
+        };
+        
+        const { resources } = await container.items.query(querySpec).fetchAll();
+        
+        if (resources.length === 0) {
+            return res.status(404).json({ erro: "Cidadão não encontrado." });
+        }
+        
+        res.status(200).json({ dados: resources[0] });
+    } catch (error) {
+        console.error("Erro ao procurar cidadão:", error);
+        res.status(500).json({ erro: "Falha na base de dados." });
+    }
+});
+
+// NOVA ROTA: Ocorrências de um Cidadão (Para o Perfil Histórico)
+app.get('/api/ocorrencias/cidadao/:id', async (req, res) => {
+    try {
+        const cidadaoId = req.params.id;
+        const container = await getOcorrenciasContainer();
+        
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.cidadaoId = @cidadaoId ORDER BY c.dataReporte DESC",
+            parameters: [{ name: "@cidadaoId", value: cidadaoId }]
+        };
+        
+        const { resources } = await container.items.query(querySpec).fetchAll();
+        
+        res.status(200).json({ dados: resources });
+    } catch (error) {
+        res.status(500).json({ erro: "Falha na base de dados." });
+    }
+});
+
 // NOVA ROTA: Registar uma conta da Autarquia
 app.post('/api/autarquias', async (req, res) => {
     try {
-        const { nome, email, municipio } = req.body; // Recebe os dados da autarquia
+        const { nome, email, municipio } = req.body; 
 
-        // Validação simples
         if (!nome || !email || !municipio) {
             return res.status(400).json({ erro: "O nome, email e município são obrigatórios!" });
         }
 
-        // Usamos o mesmo container, mas o 'tipoUtilizador' vai separar as águas
         const container = await getCidadaosContainer();
 
-        // Estrutura do documento JSON da autarquia
         const novaAutarquia = {
-            id: `autarquia_${Date.now()}`, // Colocamos um prefixo para ser fácil de identificar
+            id: `autarquia_${Date.now()}`,
             nome: nome,
             email: email,
             municipio: municipio,
-            tipoUtilizador: "Autarquia", // Isto é o que dá as permissões especiais!
+            tipoUtilizador: "Autarquia",
             dataRegisto: new Date().toISOString()
-            // Nota: Não colocamos 'pontosGamificacao' porque a câmara não ganha pontos
         };
 
-        // Guarda na base de dados (Cosmos DB)
         const { resource } = await container.items.create(novaAutarquia);
         
         res.status(201).json({ 

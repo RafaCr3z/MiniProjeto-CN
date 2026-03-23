@@ -1,0 +1,204 @@
+.profile-container {
+  padding: var(--spacing-md);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-info h2 {
+  font-size: 2rem;
+  margin-bottom: 0.2rem;
+}
+
+.profile-points {
+  text-align: right;
+  padding: 1rem 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.points-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.points-total {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.icon-inline {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-right: 0.5rem;
+  color: var(--accent-primary);
+}
+
+.rewards-section h3, .history-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.reward-card {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.reward-card:not(.locked):hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-primary);
+}
+
+.reward-card.locked {
+  opacity: 0.7;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+
+.reward-icon {
+  width: 72px;
+  height: 72px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-card h4 {
+  font-size: 1.3rem;
+}
+
+.reward-card p {
+  color: var(--text-secondary);
+  flex: 1;
+  line-height: 1.5;
+}
+
+.reward-btn {
+  width: 100%;
+  margin-top: auto;
+  padding: 0.8rem;
+}
+
+.history-section {
+  padding: 2rem 1.5rem;
+}
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--glass-border);
+  transition: background 0.3s ease;
+}
+
+.history-item:hover {
+  background: var(--bg-secondary);
+}
+
+.history-details strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+.history-details span {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.history-points {
+  font-weight: 700;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+.history-points.success {
+  color: var(--success);
+}
+
+.history-points.pending {
+  color: var(--warning);
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .profile-points {
+    text-align: center;
+    width: 100%;
+  }
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .history-points {
+    align-self: flex-end;
+  }
+}

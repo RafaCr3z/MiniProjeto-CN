@@ -1,0 +1,135 @@
+.report-container {
+  padding: var(--spacing-md);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.report-header {
+  margin-bottom: 2rem;
+}
+
+.report-form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-control {
+  padding: 0.8rem 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.upload-area {
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--border-radius-md);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--bg-secondary);
+}
+
+.upload-icon {
+  color: inherit;
+}
+
+.file-input {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.location-display {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--glass-border);
+  font-weight: 500;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Success Card */
+.text-center {
+  text-align: center;
+}
+
+.success-card {
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 4rem auto;
+}
+
+.success-icon {
+  color: var(--success);
+  margin-bottom: 1rem;
+}
+
+.points-reward {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-md);
+  width: 100%;
+  font-weight: 500;
+  border: 1px dashed var(--accent-primary);
+}
+
+.points-value {
+  display: block;
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-top: 0.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}

@@ -1,0 +1,77 @@
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: calc(100vh - 120px);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.auth-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.role-selector {
+  display: flex;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.3rem;
+  margin: 2rem 0;
+  border: 1px solid var(--glass-border);
+}
+
+.role-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.role-btn.active {
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+.auth-footer {
+  margin-top: 2rem;
+  color: var(--text-secondary);
+}
+
+.toggle-link {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
