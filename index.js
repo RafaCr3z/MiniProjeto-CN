@@ -55,6 +55,44 @@ app.post('/api/cidadaos', async (req, res) => {
     }
 });
 
+// NOVA ROTA: Registar uma conta da Autarquia
+app.post('/api/autarquias', async (req, res) => {
+    try {
+        const { nome, email, municipio } = req.body; // Recebe os dados da autarquia
+
+        // Validação simples
+        if (!nome || !email || !municipio) {
+            return res.status(400).json({ erro: "O nome, email e município são obrigatórios!" });
+        }
+
+        // Usamos o mesmo container, mas o 'tipoUtilizador' vai separar as águas
+        const container = await getCidadaosContainer();
+
+        // Estrutura do documento JSON da autarquia
+        const novaAutarquia = {
+            id: `autarquia_${Date.now()}`, // Colocamos um prefixo para ser fácil de identificar
+            nome: nome,
+            email: email,
+            municipio: municipio,
+            tipoUtilizador: "Autarquia", // Isto é o que dá as permissões especiais!
+            dataRegisto: new Date().toISOString()
+            // Nota: Não colocamos 'pontosGamificacao' porque a câmara não ganha pontos
+        };
+
+        // Guarda na base de dados (Cosmos DB)
+        const { resource } = await container.items.create(novaAutarquia);
+        
+        res.status(201).json({ 
+            mensagem: "Conta de Autarquia registada com sucesso!", 
+            dados: resource 
+        });
+
+    } catch (error) {
+        console.error("Erro ao criar conta de autarquia:", error);
+        res.status(500).json({ erro: "Falha ao registar a autarquia na base de dados." });
+    }
+});
+
 // NOVA ROTA: Registar uma Ocorrência
 app.post('/api/ocorrencias', async (req, res) => {
     try {
@@ -179,6 +217,9 @@ app.put('/api/ocorrencias/:id/resolver', async (req, res) => {
         res.status(500).json({ erro: "Falha ao resolver a ocorrência e atribuir pontos." });
     }
 });
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Servidor CityGuards a correr na porta ${PORT}`);

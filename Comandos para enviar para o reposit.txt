@@ -1,0 +1,8 @@
+Comandos para enviar para o repositório do GitHub
+
+
+git add .
+
+git commit -m "Ação (O que se fez)"
+
+git push
