@@ -55,6 +55,49 @@ app.post('/api/cidadaos', async (req, res) => {
     }
 });
 
+// NOVA ROTA: Obter Cidadão por Email (Para Login)
+app.get('/api/cidadaos/email/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const container = await getCidadaosContainer();
+        
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.email = @email",
+            parameters: [{ name: "@email", value: email }]
+        };
+        
+        const { resources } = await container.items.query(querySpec).fetchAll();
+        
+        if (resources.length === 0) {
+            return res.status(404).json({ erro: "Cidadão não encontrado." });
+        }
+        
+        res.status(200).json({ dados: resources[0] });
+    } catch (error) {
+        console.error("Erro ao procurar cidadão:", error);
+        res.status(500).json({ erro: "Falha na base de dados." });
+    }
+});
+
+// NOVA ROTA: Ocorrências de um Cidadão (Para o Perfil Histórico)
+app.get('/api/ocorrencias/cidadao/:id', async (req, res) => {
+    try {
+        const cidadaoId = req.params.id;
+        const container = await getOcorrenciasContainer();
+        
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.cidadaoId = @cidadaoId ORDER BY c.dataReporte DESC",
+            parameters: [{ name: "@cidadaoId", value: cidadaoId }]
+        };
+        
+        const { resources } = await container.items.query(querySpec).fetchAll();
+        
+        res.status(200).json({ dados: resources });
+    } catch (error) {
+        res.status(500).json({ erro: "Falha na base de dados." });
+    }
+});
+
 // NOVA ROTA: Registar uma Ocorrência
 app.post('/api/ocorrencias', async (req, res) => {
     try {
