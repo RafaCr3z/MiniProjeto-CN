@@ -55,7 +55,6 @@ app.post('/api/cidadaos', async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // NOVA ROTA: Obter Cidadão por Email (Para Login)
 app.get('/api/cidadaos/email/:email', async (req, res) => {
     try {
@@ -96,32 +95,29 @@ app.get('/api/ocorrencias/cidadao/:id', async (req, res) => {
         res.status(200).json({ dados: resources });
     } catch (error) {
         res.status(500).json({ erro: "Falha na base de dados." });
-=======
+    }
+});
+
 // NOVA ROTA: Registar uma conta da Autarquia
 app.post('/api/autarquias', async (req, res) => {
     try {
-        const { nome, email, municipio } = req.body; // Recebe os dados da autarquia
+        const { nome, email, municipio } = req.body; 
 
-        // Validação simples
         if (!nome || !email || !municipio) {
             return res.status(400).json({ erro: "O nome, email e município são obrigatórios!" });
         }
 
-        // Usamos o mesmo container, mas o 'tipoUtilizador' vai separar as águas
         const container = await getCidadaosContainer();
 
-        // Estrutura do documento JSON da autarquia
         const novaAutarquia = {
-            id: `autarquia_${Date.now()}`, // Colocamos um prefixo para ser fácil de identificar
+            id: `autarquia_${Date.now()}`,
             nome: nome,
             email: email,
             municipio: municipio,
-            tipoUtilizador: "Autarquia", // Isto é o que dá as permissões especiais!
+            tipoUtilizador: "Autarquia",
             dataRegisto: new Date().toISOString()
-            // Nota: Não colocamos 'pontosGamificacao' porque a câmara não ganha pontos
         };
 
-        // Guarda na base de dados (Cosmos DB)
         const { resource } = await container.items.create(novaAutarquia);
         
         res.status(201).json({ 
@@ -132,7 +128,6 @@ app.post('/api/autarquias', async (req, res) => {
     } catch (error) {
         console.error("Erro ao criar conta de autarquia:", error);
         res.status(500).json({ erro: "Falha ao registar a autarquia na base de dados." });
->>>>>>> 944c7dc4c8ce73bb5c1587660ae9921fe1ab7ccf
     }
 });
 

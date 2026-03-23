@@ -11,6 +11,7 @@ const Auth = ({ setUser }) => {
   // Form fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [municipio, setMunicipio] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,34 +19,46 @@ const Auth = ({ setUser }) => {
     setError('');
 
     try {
-      if (role === 'council') {
-        // Simulating hardcoded council login setup
-        setTimeout(() => {
-          setUser({ role: 'council', name: 'Gestor Municipal' });
-        }, 500);
-        return;
-      }
-
-      // Cidadão requests via API
       if (isLogin) {
+        // Ambas as roles (Cidadão e Autarquia) estão guardadas no mesmo container e podem ser lidas por email!
         const res = await fetch(`/api/cidadaos/email/${email}`);
         const data = await res.json();
         
-        if (!res.ok) throw new Error(data.erro || 'Falha no login');
-        setUser({ ...data.dados, role: 'citizen' });
-      } else {
-        const res = await fetch('/api/cidadaos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome: name, email })
-        });
-        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || 'Credenciais inválidas ou utilizador inexistente.');
         
-        if (!res.ok) throw new Error(data.erro || 'Falha no registo');
-        setUser({ ...data.dados, role: 'citizen' });
+        // Verifica se a role bate certo (se escolheu Autarquia, assegura que é Autarquia no Azure)
+        const isCouncil = data.dados.tipoUtilizador === 'Autarquia';
+        if (role === 'council' && !isCouncil) throw new Error('Esta conta pertence a um Cidadão.');
+        if (role === 'citizen' && isCouncil) throw new Error('Esta conta pertence a uma Autarquia.');
+        
+        setUser({ ...data.dados, role: isCouncil ? 'council' : 'citizen' });
+      } else {
+        // Fluxo de Registo Frontal ligado para o CosmosDB
+        if (role === 'council') {
+          const res = await fetch('/api/autarquias', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: name, email, municipio })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.erro || 'Falha no registo da Autarquia');
+          
+          setUser({ ...data.dados, role: 'council' });
+        } else {
+          const res = await fetch('/api/cidadaos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: name, email })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.erro || 'Falha no registo do Cidadão');
+          
+          setUser({ ...data.dados, role: 'citizen' });
+        }
       }
     } catch (err) {
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -76,17 +89,25 @@ const Auth = ({ setUser }) => {
           </button>
         </div>
 
-        {error && <div className="badge-danger" style={{padding: '0.8rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'left'}}>{error}</div>}
+        {error && <div className="badge-danger" style={{padding: '0.8rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'left', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)'}}>{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          {!isLogin && role === 'citizen' && (
-            <div className="form-group">
-              <label>Nome Completo</label>
-              <input type="text" className="form-control" required value={name} onChange={e => setName(e.target.value)} placeholder="Ex: João Silva" />
-            </div>
+          {!isLogin && (
+            <>
+              <div className="form-group">
+                <label>Nome {role === 'council' ? 'da Entidade' : 'Completo'}</label>
+                <input type="text" className="form-control" required value={name} onChange={e => setName(e.target.value)} placeholder={role === 'council' ? 'Câmara Municipal de X' : 'Ex: João Silva'} />
+              </div>
+              {role === 'council' && (
+                <div className="form-group">
+                  <label>Município</label>
+                  <input type="text" className="form-control" required value={municipio} onChange={e => setMunicipio(e.target.value)} placeholder="Distrito ou Concelho" />
+                </div>
+              )}
+            </>
           )}
           <div className="form-group">
-            <label>Email {role==='council' && '(Simulação)'}</label>
+            <label>Email Oficial</label>
             <input type="email" className="form-control" required value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" />
           </div>
           <div className="form-group">
@@ -99,16 +120,14 @@ const Auth = ({ setUser }) => {
           </button>
         </form>
 
-        {role === 'citizen' && (
-          <div className="auth-footer">
-            <p>
-              {isLogin ? "Ainda não tem conta? " : "Já tem uma conta? "}
-              <span className="text-gradient toggle-link" onClick={() => {setIsLogin(!isLogin); setError('');}}>
-                {isLogin ? "Registe-se aqui" : "Entre aqui"}
-              </span>
-            </p>
-          </div>
-        )}
+        <div className="auth-footer">
+          <p>
+            {isLogin ? "Ainda não tem conta? " : "Já tem uma conta? "}
+            <span className="text-gradient toggle-link" onClick={() => {setIsLogin(!isLogin); setError('');}}>
+              {isLogin ? "Registe-se aqui" : "Entre aqui"}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
